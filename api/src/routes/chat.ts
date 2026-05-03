@@ -15,7 +15,7 @@ interface ChatRequest {
 chatRoute.post('/', async (c) => {
   const { messages, systemPrompt, ollamaModel } = await c.req.json<ChatRequest>();
 
-  const ollamaHost = process.env.OLLAMA_HOST || 'http://192.168.1.84:11434';
+  const ollamaHost = process.env.OLLAMA_HOST || 'http://127.0.0.1:11434';
   const model = ollamaModel || process.env.OLLAMA_MODEL || 'llama3.2:1b';
 
   try {
