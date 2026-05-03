@@ -21,23 +21,16 @@ const app = new Hono<{ Bindings: Env }>();
 
 // CORS: solo desde codehub.cl y sus subdominios
 app.use('*', cors({
-  origin: (origin: string | undefined): string | boolean => {
-    if (!origin) return false;
+  origin: (origin) => {
+    if (!origin) return '*'; // allow requests without origin (curl, server-to-server)
     try {
       const url = new URL(origin);
-      const allowedDomains = [
-        'codehub.cl',
-        'localhost',
-        '127.0.0.1',
-      ];
+      const allowedDomains = ['codehub.cl', 'localhost', '127.0.0.1'];
       const host = url.hostname;
-      // Check exact match or subdomain
-      const isAllowed = allowedDomains.some(d =>
-        host === d || host.endsWith('.' + d)
-      );
-      return isAllowed ? origin : false;
+      const isAllowed = allowedDomains.some(d => host === d || host.endsWith('.' + d));
+      return isAllowed ? origin : '';
     } catch {
-      return false;
+      return '';
     }
   },
   allowHeaders: ['Authorization', 'Content-Type', 'X-API-Key'],
