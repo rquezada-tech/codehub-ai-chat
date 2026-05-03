@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -24,7 +24,7 @@ COPY --from=builder /app/dist ./dist
 COPY package*.json ./
 
 # Environment variables (set in CapRover)
-ENV API_SECRET_KEY=CHANGE_ME_IN_CAPR
+ENV API_SECRET_KEY=CHANGE_ME_IN_CAPROVER
 ENV OLLAMA_HOST=http://host.docker.internal:11434
 ENV OLLAMA_MODEL=llama3.2:1b
 ENV MYSQL_HOST=srv-captain--mysql-db
