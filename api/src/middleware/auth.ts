@@ -1,18 +1,16 @@
 import type { Context, Next } from 'hono';
 
 export async function verifyApiKey(c: Context, next: Next) {
-  // Acepta API key via header o query param para flexibilidad
   const apiKey = c.req.header('X-API-Key') ||
                  c.req.header('Authorization')?.replace(/^Bearer\s+/i, '') ||
                  c.req.query('api_key');
 
-  const validKey = c.env?.API_SECRET_KEY;
+  const validKey = (c.env as any)?.API_SECRET_KEY;
 
   if (!apiKey || !validKey) {
     return c.json({ error: 'API key required' }, 401);
   }
 
-  // Timing-safe comparison para evitar timing attacks
   if (!timingSafeEqual(apiKey, validKey)) {
     return c.json({ error: 'Invalid API key' }, 401);
   }
