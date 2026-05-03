@@ -26,7 +26,7 @@ COPY package*.json ./
 # Environment variables (set in CapRover)
 ENV API_SECRET_KEY=CHANGE_ME_IN_CAPR
 ENV OLLAMA_HOST=http://host.docker.internal:11434
-ENV OLLAMA_MODEL=mistral-nemo:1.2b
+ENV OLLAMA_MODEL=llama3.2:1b
 ENV MYSQL_HOST=srv-captain--mysql-db
 ENV MYSQL_USER=store
 ENV MYSQL_PASSWORD=StoreCodeHub2026!
