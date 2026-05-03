@@ -9,11 +9,11 @@ export interface OllamaConfig {
 }
 
 export async function chat(
+  baseUrl: string,
   messages: Message[],
-  config: OllamaConfig
+  model: string,
+  _systemPrompt?: string
 ): Promise<string> {
-  const { baseUrl, model = 'mistral:7b-instruct-q4_0' } = config;
-
   const response = await fetch(`${baseUrl}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -35,9 +35,7 @@ export async function chat(
 
 export async function checkOllamaHealth(baseUrl: string): Promise<boolean> {
   try {
-    const response = await fetch(`${baseUrl}/api/tags`, {
-      method: 'GET',
-    });
+    const response = await fetch(`${baseUrl}/api/tags`, { method: 'GET' });
     return response.ok;
   } catch {
     return false;

@@ -2,24 +2,24 @@ import { Hono } from 'hono';
 import { chat as ollamaChat, checkOllamaHealth } from '../services/ollama';
 import { getPool, searchProducts } from '../services/mysql';
 import { buildSearchPrompt } from '../lib/prompts';
-import type { Env } from '../index';
 
-export const chatRoute = new Hono<{ Bindings: Env }>();
+export const chatRoute = new Hono();
+
+interface ChatRequest {
+  messages: Array<{ role: string; content: string }>;
+  systemPrompt?: string;
+  ollamaModel?: string;
+}
 
 // POST /chat - Chat con IA
 chatRoute.post('/', async (c) => {
-  const { messages, systemPrompt, ollamaModel } = await c.req.json<{
-    messages: Array<{ role: string; content: string }>;
-    systemPrompt?: string;
-    ollamaModel?: string;
-  }>();
+  const { messages, systemPrompt, ollamaModel } = await c.req.json<ChatRequest>();
 
-  const env = c.env as Env;
-  const ollamaHost = env.OLLAMA_HOST || 'http://ollama:11434';
-  const model = ollamaModel || env.OLLAMA_MODEL || 'mistral:7b-instruct-q4_0';
+  const env = c.env as any;
+  const ollamaHost = env.OLLAMA_HOST || 'http://host.docker.internal:11434';
+  const model = ollamaModel || env.OLLAMA_MODEL || 'llama3.2:1b';
 
   try {
-    // Si el mensaje menciona búsqueda de productos, enriquecemos con contexto
     const lastMessage = messages[messages.length - 1]?.content || '';
     let contextProducts: any[] = [];
     let enrichedMessages = messages;
@@ -45,13 +45,7 @@ chatRoute.post('/', async (c) => {
       }
     }
 
-    const response = await ollamaChat(
-      ollamaHost,
-      enrichedMessages,
-      model,
-      systemPrompt
-    );
-
+    const response = await ollamaChat(ollamaHost, enrichedMessages, model, systemPrompt);
     return c.json({ response, contextProducts });
   } catch (error: any) {
     console.error('Ollama error:', error);
@@ -59,10 +53,10 @@ chatRoute.post('/', async (c) => {
   }
 });
 
-// GET /chat/health - Verificar estado de Ollama
+// GET /chat/health
 chatRoute.get('/health', async (c) => {
-  const env = c.env as Env;
-  const ollamaHost = env.OLLAMA_HOST || 'http://ollama:11434';
+  const env = c.env as any;
+  const ollamaHost = env.OLLAMA_HOST || 'http://host.docker.internal:11434';
   const health = await checkOllamaHealth(ollamaHost);
   return c.json(health);
 });
