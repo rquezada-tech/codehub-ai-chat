@@ -5,7 +5,7 @@ export async function verifyApiKey(c: Context, next: Next) {
                  c.req.header('x-api-key') ||
                  c.req.header('authorization')?.replace(/^bearer\s+/i, '');
 
-  const validKey = (c.env as any)?.API_SECRET_KEY;
+  const validKey = process.env.API_SECRET_KEY;
 
   if (!apiKey || !validKey) {
     return c.json({ error: 'API key required', debug: { hasKey: !!apiKey, hasValid: !!validKey } }, 401);
