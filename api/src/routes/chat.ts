@@ -1,12 +1,12 @@
 import { Hono } from 'hono';
-import { chat as ollamaChat, checkOllamaHealth } from '../services/ollama';
+import { chat as ollamaChat, checkOllamaHealth, type Message } from '../services/ollama';
 import { getPool, searchProducts } from '../services/mysql';
 import { buildSearchPrompt } from '../lib/prompts';
 
 export const chatRoute = new Hono();
 
 interface ChatRequest {
-  messages: Array<{ role: string; content: string }>;
+  messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
   systemPrompt?: string;
   ollamaModel?: string;
 }
@@ -22,7 +22,7 @@ chatRoute.post('/', async (c) => {
   try {
     const lastMessage = messages[messages.length - 1]?.content || '';
     let contextProducts: any[] = [];
-    let enrichedMessages = messages;
+    let enrichedMessages: Message[] = messages as Message[];
 
     if (lastMessage.match(/buscar|producto|precio|stock|tienen|hay|modelo|categor/i)) {
       try {
@@ -36,8 +36,8 @@ chatRoute.post('/', async (c) => {
         if (contextProducts.length > 0) {
           const prompt = buildSearchPrompt(lastMessage, contextProducts);
           enrichedMessages = [
-            ...messages.slice(0, -1),
-            { role: 'user', content: prompt },
+            ...messages.slice(0, -1) as Message[],
+            { role: 'user', content: prompt } as Message,
           ];
         }
       } catch (dbError) {
@@ -58,5 +58,5 @@ chatRoute.get('/health', async (c) => {
   const env = c.env as any;
   const ollamaHost = env.OLLAMA_HOST || 'http://host.docker.internal:11434';
   const health = await checkOllamaHealth(ollamaHost);
-  return c.json(health);
+  return c.json({ healthy: health });
 });

@@ -10,7 +10,7 @@ erpnextRoute.post('/login', async (c) => {
   const erpUrl = env.ERPNEXT_URL || 'http://erpnext:8088';
 
   try {
-    const session = await createERPNextSession(erpUrl, email, password);
+    const session = await createERPNextSession({ baseUrl: erpUrl });
     return c.json(session);
   } catch (error: any) {
     return c.json({ error: error.message || 'Login failed' }, 401);
