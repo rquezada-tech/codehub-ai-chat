@@ -1,11 +1,11 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine
 
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies (npm install works without lock file)
+# Install dependencies
 RUN npm install
 
 # Copy source
@@ -19,19 +19,20 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files and install production deps
-COPY package*.json ./
-RUN npm install --omit=dev
-
-# Copy built files
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+COPY package*.json ./
 
-# Expose port
+# Environment variables (set in CapRover)
+ENV API_SECRET_KEY=CHANGE_ME_IN_CAPR
+ENV OLLAMA_HOST=http://host.docker.internal:11434
+ENV OLLAMA_MODEL=mistral-nemo:1.2b
+ENV MYSQL_HOST=srv-captain--mysql-db
+ENV MYSQL_USER=store
+ENV MYSQL_PASSWORD=StoreCodeHub2026!
+ENV MYSQL_DATABASE=store
+ENV ERPNEXT_URL=http://erpnext:8088
+
 EXPOSE 3001
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD wget -qO- http://localhost:3001/health || exit 1
-
-# Start
 CMD ["node", "dist/index.js"]
