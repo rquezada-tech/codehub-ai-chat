@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # Ollama LLM Server
+  ollama:
+    build:
+      context: ./ollama
+      dockerfile: Dockerfile
+    container_name: codehub-ai-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      ollama_data:/root/.ollama
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+    networks:
+      - codehub-ai-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Hono API Server
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: codehub-ai-api
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: mistral:7b-instruct-q4_0
+      # MySQL WooCommerce
+      MYSQL_HOST: srv-captain--mysql-db
+      MYSQL_PORT: "3306"
+      MYSQL_USER: store
+      MYSQL_PASSWORD: StoreCodeHub2026!
+      MYSQL_DATABASE: store
+      # ERPNext
+      ERPNEXT_URL: http://localhost:8088
+      # Security
+      API_SECRET_KEY: ${API_SECRET_KEY:-change-me-in-production}
+    depends_on:
+      ollama:
+        condition: service_healthy
+    networks:
+      - codehub-ai-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+networks:
+  codehub-ai-net:
+    driver: bridge
+
+volumes:
+  ollama_data:
