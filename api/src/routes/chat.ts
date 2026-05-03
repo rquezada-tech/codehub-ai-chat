@@ -15,9 +15,8 @@ interface ChatRequest {
 chatRoute.post('/', async (c) => {
   const { messages, systemPrompt, ollamaModel } = await c.req.json<ChatRequest>();
 
-  const env = c.env as any;
-  const ollamaHost = env.OLLAMA_HOST || 'http://host.docker.internal:11434';
-  const model = ollamaModel || env.OLLAMA_MODEL || 'llama3.2:1b';
+  const ollamaHost = process.env.OLLAMA_HOST || 'http://192.168.1.84:11434';
+  const model = ollamaModel || process.env.OLLAMA_MODEL || 'llama3.2:1b';
 
   try {
     const lastMessage = messages[messages.length - 1]?.content || '';
@@ -27,10 +26,10 @@ chatRoute.post('/', async (c) => {
     if (lastMessage.match(/buscar|producto|precio|stock|tienen|hay|modelo|categor/i)) {
       try {
         const pool = getPool({
-          host: env.MYSQL_HOST || 'srv-captain--mysql-db',
-          user: env.MYSQL_USER || 'store',
-          password: env.MYSQL_PASSWORD || 'StoreCodeHub2026!',
-          database: env.MYSQL_DATABASE || 'store',
+          host: process.env.MYSQL_HOST || 'srv-captain--mysql-db',
+          user: process.env.MYSQL_USER || 'store',
+          password: process.env.MYSQL_PASSWORD || 'StoreCodeHub2026!',
+          database: process.env.MYSQL_DATABASE || 'store',
         });
         contextProducts = await searchProducts(pool, lastMessage);
         if (contextProducts.length > 0) {
@@ -57,8 +56,7 @@ chatRoute.post('/', async (c) => {
 
 // GET /chat/health
 chatRoute.get('/health', async (c) => {
-  const env = c.env as any;
-  const ollamaHost = env.OLLAMA_HOST || 'http://host.docker.internal:11434';
+  const ollamaHost = process.env.OLLAMA_HOST || 'http://192.168.1.84:11434';
   const health = await checkOllamaHealth(ollamaHost);
   return c.json({ healthy: health });
 });

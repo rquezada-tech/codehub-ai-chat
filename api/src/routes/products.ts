@@ -8,12 +8,11 @@ productsRoute.get('/search', async (c) => {
   const query = c.req.query('q') || '';
   const limit = parseInt(c.req.query('limit') || '20');
 
-  const env = c.env as any;
   const config = {
-    host: env.MYSQL_HOST || 'srv-captain--mysql-db',
-    user: env.MYSQL_USER || 'store',
-    password: env.MYSQL_PASSWORD || 'StoreCodeHub2026!',
-    database: env.MYSQL_DATABASE || 'store',
+    host: process.env.MYSQL_HOST || 'srv-captain--mysql-db',
+    user: process.env.MYSQL_USER || 'store',
+    password: process.env.MYSQL_PASSWORD || 'StoreCodeHub2026!',
+    database: process.env.MYSQL_DATABASE || 'store',
   };
 
   const pool = getPool(config);
@@ -25,12 +24,11 @@ productsRoute.get('/search', async (c) => {
 productsRoute.get('/:id', async (c) => {
   const id = c.req.param('id');
 
-  const env = c.env as any;
   const config = {
-    host: env.MYSQL_HOST || 'srv-captain--mysql-db',
-    user: env.MYSQL_USER || 'store',
-    password: env.MYSQL_PASSWORD || 'StoreCodeHub2026!',
-    database: env.MYSQL_DATABASE || 'store',
+    host: process.env.MYSQL_HOST || 'srv-captain--mysql-db',
+    user: process.env.MYSQL_USER || 'store',
+    password: process.env.MYSQL_PASSWORD || 'StoreCodeHub2026!',
+    database: process.env.MYSQL_DATABASE || 'store',
   };
 
   const pool = getPool(config);

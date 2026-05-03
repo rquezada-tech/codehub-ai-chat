@@ -6,8 +6,7 @@ export const erpnextRoute = new Hono();
 // POST /erpnext/login
 erpnextRoute.post('/login', async (c) => {
   const { email, password } = await c.req.json<{ email: string; password: string }>();
-  const env = c.env as any;
-  const erpUrl = env.ERPNEXT_URL || 'http://erpnext:8088';
+  const erpUrl = process.env.ERPNEXT_URL || 'http://erpnext:8088';
 
   try {
     const session = await createERPNextSession({ baseUrl: erpUrl });
