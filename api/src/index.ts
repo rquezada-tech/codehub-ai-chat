@@ -42,6 +42,19 @@ app.use('*', cors({
 // Health check público (sin auth)
 app.get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
+// Debug endpoint para ver env real en runtime
+app.get('/debug-env', (c) => {
+  const env = c.env as any;
+  return c.json({
+    OLLAMA_HOST_cenv: env.OLLAMA_HOST || 'UNDEFINED',
+    OLLAMA_MODEL_cenv: env.OLLAMA_MODEL || 'UNDEFINED',
+    MYSQL_HOST_cenv: env.MYSQL_HOST || 'UNDEFINED',
+    API_KEY_SET: !!env.API_SECRET_KEY,
+    process_OLLAMA: process.env.OLLAMA_HOST || 'UNDEFINED',
+    process_OLLAMA_MODEL: process.env.OLLAMA_MODEL || 'UNDEFINED',
+  });
+});
+
 // Rutas protegidas con API key
 app.use('/chat/*', verifyApiKey);
 app.use('/products/*', verifyApiKey);
