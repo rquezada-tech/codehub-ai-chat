@@ -34,10 +34,12 @@ chatRoute.post('/', async (c) => {
         });
         contextProducts = await searchProducts(pool, lastMessage);
         if (contextProducts.length > 0) {
-          const prompt = buildSearchPrompt(lastMessage, contextProducts);
+          // buildSearchPrompt returns Message[] - prepend system msg, replace last user msg
+          const searchMsgs = buildSearchPrompt(lastMessage, contextProducts, systemPrompt);
           enrichedMessages = [
-            ...messages.slice(0, -1) as Message[],
-            { role: 'user', content: prompt } as Message,
+            searchMsgs[0], // system
+            ...messages.slice(0, -1) as Message[], // all but last user msg
+            searchMsgs[1], // the enriched user msg from buildSearchPrompt
           ];
         }
       } catch (dbError) {
@@ -45,7 +47,7 @@ chatRoute.post('/', async (c) => {
       }
     }
 
-    const response = await ollamaChat(ollamaHost, enrichedMessages, model, systemPrompt);
+    const response = await ollamaChat(ollamaHost, enrichedMessages, model);
     return c.json({ response, contextProducts });
   } catch (error: any) {
     console.error('Ollama error:', error);
