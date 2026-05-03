@@ -3,8 +3,9 @@ import { chat as ollamaChat, checkOllamaHealth } from '../services/ollama';
 import { getPool, searchProducts } from '../services/mysql';
 import { buildSearchPrompt } from '../lib/prompts';
 import { getWooConfig } from '../lib/config';
+import type { Env } from '../index';
 
-export const chatRoute = new Hono();
+export const chatRoute = new Hono<{ Bindings: Env }>();
 
 chatRoute.post('/', async (c) => {
   const { message, conversationHistory = [], systemPrompt } = await c.req.json();

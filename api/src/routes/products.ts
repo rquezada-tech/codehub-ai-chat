@@ -1,8 +1,9 @@
 import { Hono } from 'hono';
 import { getPool, searchProducts } from '../services/mysql';
 import { getWooConfig } from '../lib/config';
+import type { Env } from '../index';
 
-export const productsRoute = new Hono();
+export const productsRoute = new Hono<{ Bindings: Env }>();
 
 productsRoute.get('/search', async (c) => {
   const query = c.req.query('q') || '';

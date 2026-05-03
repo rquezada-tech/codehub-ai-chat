@@ -6,24 +6,36 @@ import { chatRoute } from './routes/chat';
 import { productsRoute } from './routes/products';
 import { erpnextRoute } from './routes/erpnext';
 
-const app = new Hono();
+export interface Env {
+  API_SECRET_KEY: string;
+  OLLAMA_HOST: string;
+  OLLAMA_MODEL: string;
+  MYSQL_HOST: string;
+  MYSQL_USER: string;
+  MYSQL_PASSWORD: string;
+  MYSQL_DATABASE: string;
+  ERPNEXT_URL: string;
+}
+
+const app = new Hono<{ Bindings: Env }>();
 
 // CORS: solo desde codehub.cl y sus subdominios
 app.use('*', cors({
-  origin: (origin) => {
+  origin: (origin: string | undefined): string | boolean => {
     if (!origin) return false;
     try {
       const url = new URL(origin);
-      const allowedHosts = [
+      const allowedDomains = [
         'codehub.cl',
-        '.codehub.cl',  // cualquier subdominio
         'localhost',
         '127.0.0.1',
       ];
       const host = url.hostname;
-      return allowedHosts.some(allowed =>
-        host === allowed || host.endsWith('.' + allowed)
+      // Check exact match or subdomain
+      const isAllowed = allowedDomains.some(d =>
+        host === d || host.endsWith('.' + d)
       );
+      return isAllowed ? origin : false;
     } catch {
       return false;
     }

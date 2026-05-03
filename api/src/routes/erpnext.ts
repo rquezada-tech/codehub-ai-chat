@@ -1,7 +1,8 @@
 import { Hono } from 'hono';
 import { createERPNextSession } from '../services/erpnext';
+import type { Env } from '../index';
 
-export const erpnextRoute = new Hono();
+export const erpnextRoute = new Hono<{ Bindings: Env }>();
 
 // Login to ERPNext
 erpnextRoute.post('/login', async (c) => {

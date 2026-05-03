@@ -59,15 +59,15 @@ export async function searchProducts(db: mysql.Pool, query: string, limit = 20):
     LIMIT ?
   `, [searchTerm, searchTerm, searchTerm, limit]);
 
-  const products = (rows as any[]).map((row) => ({
+  const products: WooProduct[] = (rows as any[]).map((row) => ({
     id: row.id,
     title: row.title || '',
     sku: row.sku || '',
     price: parseFloat(row.price) || 0,
     stock: parseInt(row.stock) || 0,
     description: stripHtml(row.description || ''),
-    categories: [],
-    image: null,
+    categories: [] as string[],
+    image: undefined,
   }));
 
   // Fetch categories and image for each product
